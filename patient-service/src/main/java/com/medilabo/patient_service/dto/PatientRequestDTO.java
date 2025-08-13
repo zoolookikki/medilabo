@@ -25,7 +25,10 @@ public class PatientRequestDTO {
     @NotNull(message = "Birth date is mandatory")
     // pour valider qu’une date se situe dans le passé par rapport à la date actuelle.
     @Past(message = "Birth date must be in the past")
-    // pour contrôler le format de sérialisation/désérialisation JSON pour ce champ.
+    /*
+    Pour que Jackson convertisse le champ en LocalDate uniquement.
+    Attention : ne fait pas le contrôle, il est fait au moment de la déssérialiation et donc une exception HttpMessageNotReadableException est lancée. 
+    */
     @JsonFormat(pattern="yyyy-MM-dd") 
     private LocalDate birthDate;
     
