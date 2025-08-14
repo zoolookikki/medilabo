@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     /**
-    * To catch exceptions when validation on a request body fails (@NotNull, @NotBlank, @Email).
+    * To catch exceptions when validation on a request body fails (@NotNull, @NotBlank, @Email etc...).
     *
     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -121,6 +121,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(errorMessage);
+    }
+    
+    // pour que l'erreur soit idem des 2 cotés : via PostMan et via le test d'intégration (sinon le test d'intégration échoue).
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<?> handleRuntime(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                             .body(Map.of("error", "Internal error"));
     }
     
     /**

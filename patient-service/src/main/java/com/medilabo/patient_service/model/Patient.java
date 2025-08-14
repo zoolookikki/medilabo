@@ -10,6 +10,7 @@ import lombok.*;
 @Getter 
 @Setter 
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString
 public class Patient {
   public enum Gender { MALE, FEMALE, UNKNOW }

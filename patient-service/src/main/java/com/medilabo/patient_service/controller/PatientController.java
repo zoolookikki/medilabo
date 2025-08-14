@@ -75,11 +75,9 @@ public class PatientController {
         }
     }
 
-/*
     @GetMapping("/simulate500")
     public String simulate500() {
         throw new RuntimeException("Simulation d'erreur interne");
     }
-*/
 }
 
