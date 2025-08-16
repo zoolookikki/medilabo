@@ -1,0 +1,26 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      # très important car j'ai la version mvc et non flux.
+      mvc:
+        routes:
+          - id: patient-service
+            uri: http://localhost:8081
+            predicates:
+              - Path=/api/patients/**
+            filters:
+              # /api/patients/...  ->  /patients/... pour le backend
+              - StripPrefix=1
+
+logging:
+  level:
+    # pour voir les détails du routing.
+    org.springframework.cloud.gateway: DEBUG
+    # pour voir les requêtes entrantes, les erreurs.
+    org.springframework.web: DEBUG
+
