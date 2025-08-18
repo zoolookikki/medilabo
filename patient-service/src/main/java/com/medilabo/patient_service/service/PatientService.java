@@ -28,7 +28,6 @@ public class PatientService {
       for (Patient patient : patients) {
           result.add(patientMapper.entityToResponseDTO(patient));
       }
-
       return result;
   }
   

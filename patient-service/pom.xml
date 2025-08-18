@@ -12,7 +12,7 @@
 	<artifactId>patient-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>patient-service</name>
-	<description>Patient microservice</description>
+	<description>REST API microservice for managing patient data</description>
 	<url/>
 	<licenses>
 		<license/>
