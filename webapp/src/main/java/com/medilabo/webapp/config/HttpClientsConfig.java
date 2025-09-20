@@ -7,10 +7,10 @@ import org.springframework.web.client.RestClient;
 
 @Configuration
 public class HttpClientsConfig {
-  @Bean
-  RestClient restClient(@Value("${medilabo.url.api}") String baseUrl) {
-    return RestClient.builder()
-        .baseUrl(baseUrl) 
-        .build();
-  }
+    @Bean
+    RestClient restClient(@Value("${medilabo.url.api}") String baseUrl) {
+        return RestClient.builder()
+                .baseUrl(baseUrl) 
+                .build();
+    }
 }
