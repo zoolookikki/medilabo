@@ -42,6 +42,5 @@ public class PatientRequestDTO {
             regexp = "^$|^\\d{3}-\\d{3}-\\d{4}$",
             message = "Phone must be empty or in the format XXX-XXX-XXXX (digits only)"
     )
-    @Size(max = 12, message = "Phone number must not exceed 12 characters")
     private String phoneNumber;
 }

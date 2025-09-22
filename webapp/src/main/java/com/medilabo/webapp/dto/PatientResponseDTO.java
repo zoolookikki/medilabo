@@ -19,7 +19,7 @@ public class PatientResponseDTO {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate birthDate;
     
-    private String gender;       
+    private Gender gender;
     
     private String address;
     
