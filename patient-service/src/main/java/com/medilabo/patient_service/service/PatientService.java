@@ -15,6 +15,7 @@ import com.medilabo.patient_service.repository.PatientRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service 
+//Coupler @RequiredArgsConstructor avec des champs final pour rendre les dépendances immuables ==> mieux que @Autowired devenu obsolète.
 @RequiredArgsConstructor
 public class PatientService {
     
