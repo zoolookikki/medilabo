@@ -24,6 +24,7 @@ public class Note {
     @Id
     private String id;
 
+    // Référence vers l’id du patient (stocké dans la base SQL de Patient-service). 
     @Indexed
     private Long patientId;
 
