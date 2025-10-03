@@ -58,4 +58,9 @@ public class NoteController {
                 .status(HttpStatus.CREATED) // 201 created => preferable to 200 ok.
                 .body(createdNote); // to respect the standard.
     }
+    
+    @GetMapping("/simulate500")
+    public String simulate500() {
+        throw new RuntimeException("Simulation d'erreur interne");
+    }
 }
