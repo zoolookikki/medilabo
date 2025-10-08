@@ -15,7 +15,7 @@
 
     <div class="col-md-6">
       <label class="form-label">Last Name</label>
-      <input type="text" th:field="*{lastName}" class="form-control">
+      <input type="text" th:field="*{lastName}" class="form-control" autofocus>
       <small class="form-text text-muted">Mandatory and not exceed 50 characters</small>      
       <div class="text-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
     </div>

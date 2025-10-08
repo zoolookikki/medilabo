@@ -18,10 +18,11 @@ public class GlobalExceptionHandler {
         return "error";
     }
 
-    // Service Patient injoignable ou autre erreur (par exemple : erreur de programmation concernant l'appel aux API).
-    @ExceptionHandler(PatientServiceUnavailableException.class)
-    public String handlePatientDown(PatientServiceUnavailableException ex, Model model) {
-        String msg = "Patient service unavailable. Please try again later.";
+    // Services Patient ou Note injoignables ou autre erreur (par exemple : erreur de programmation concernant l'appel aux API).
+    @ExceptionHandler({PatientServiceUnavailableException.class, NoteServiceUnavailableException.class})
+    public String handleServiceDown(RuntimeException ex, Model model) {
+        String service_name = (ex instanceof PatientServiceUnavailableException) ? "Patient" : "Note";
+        String msg = service_name + " service unavailable. Please try again later.";
 
         // pour trouver l'origine de l'exception du client REST
         Throwable cause = ex.getCause();
@@ -29,12 +30,12 @@ public class GlobalExceptionHandler {
         if (cause instanceof org.springframework.web.client.RestClientResponseException rce) {
             // si 5xx -> on affiche un message simple et explicite
             if (rce.getStatusCode().is5xxServerError()) {
-                msg = "Patient service is not started or unreachable behind the gateway.";
+                msg = service_name + " service is not started or unreachable behind the gateway.";
             }
             // si 4xx -> on affiche un message plus précis si disponible
             else if (rce.getStatusCode().is4xxClientError()) {
                 String details = rce.getResponseBodyAsString();
-                msg = "Patient service error (" + rce.getStatusCode().value() + " " + rce.getStatusText() + ")."
+                msg = service_name + " service error (" + rce.getStatusCode().value() + " " + rce.getStatusText() + ")."
                         + (details == null || details.isBlank() ? "" : " Details: " + details);
             }
         }
