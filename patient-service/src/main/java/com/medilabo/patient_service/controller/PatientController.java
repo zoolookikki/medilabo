@@ -54,7 +54,7 @@ public class PatientController {
     @PostMapping
     public ResponseEntity<PatientResponseDTO> createPatient(@Valid @RequestBody PatientRequestDTO req){
         log.debug("POST/patients"+ " : "+req);
-        var createdPatient = patientService.create(req);
+        PatientResponseDTO createdPatient = patientService.create(req);
         log.info("POST/patients : create ok");
         return ResponseEntity
                 .status(HttpStatus.CREATED) // 201 created => preferable to 200 ok.

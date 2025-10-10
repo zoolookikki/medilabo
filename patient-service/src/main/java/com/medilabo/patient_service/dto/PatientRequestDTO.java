@@ -3,7 +3,7 @@ package com.medilabo.patient_service.dto;
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.medilabo.patient_service.model.Patient;
+import com.medilabo.patient_service.entity.Patient;
 
 import lombok.Data;
 import jakarta.validation.constraints.NotBlank;

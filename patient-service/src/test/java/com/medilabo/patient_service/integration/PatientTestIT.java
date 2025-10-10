@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import org.springframework.http.MediaType;
 
-import com.medilabo.patient_service.model.Patient;
+import com.medilabo.patient_service.entity.Patient;
 import com.medilabo.patient_service.repository.PatientRepository;
 
 @SpringBootTest
@@ -64,20 +64,20 @@ public class PatientTestIT {
     @Test
     void getPatientsByIdFound() throws Exception {
         mvc.perform(get("/patients/{id}", patient1Id))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").value(patient1Id));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(patient1Id));
     }    
     
     @Test
     void getPatientsByIdNotFound() throws Exception {
         mvc.perform(get("/patients/{id}", 99))
-        .andExpect(status().isNotFound());
+            .andExpect(status().isNotFound());
     }    
 
     @Test
     void getPatientsByIdNotNumeric() throws Exception {
         mvc.perform(get("/patients/xxx"))
-        .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest());
     }    
     
     @Test

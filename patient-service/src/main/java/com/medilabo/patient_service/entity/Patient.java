@@ -1,4 +1,4 @@
-package com.medilabo.patient_service.model;
+package com.medilabo.patient_service.entity;
 
 import java.time.LocalDate;
 

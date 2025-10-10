@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.medilabo.patient_service.dto.PatientRequestDTO;
 import com.medilabo.patient_service.dto.PatientResponseDTO;
+import com.medilabo.patient_service.entity.Patient;
 import com.medilabo.patient_service.mapper.PatientMapper;
-import com.medilabo.patient_service.model.Patient;
 import com.medilabo.patient_service.repository.PatientRepository;
 
 import lombok.RequiredArgsConstructor;
