@@ -25,7 +25,15 @@ spring:
             filters:
               # /api/notes/...  ->  /notes/... pour le backend
               - StripPrefix=1
-                        
+          # ---------- Risk ------------
+          - id: risk-service
+            uri: http://localhost:8084
+            predicates:
+              - Path=/api/risk/**
+            filters:
+              # /api/risk/...  ->  /risk/... pour le backend
+              - StripPrefix=1
+                                    
 logging:
   level:
     # pour voir les détails du routing.
