@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.medilabo.webapp.client.PatientClient;
+import com.medilabo.webapp.client.RiskClient;
 import com.medilabo.webapp.dto.PatientRequestDTO;
 import com.medilabo.webapp.dto.PatientResponseDTO;
+import com.medilabo.webapp.dto.RiskResponseDTO;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import lombok.extern.log4j.Log4j2;
 public class PatientController {
 
     private final PatientClient patientClientApi;
+    private final RiskClient riskClientApi;
 
     @GetMapping
     public String list(Model model) {
@@ -68,6 +71,9 @@ public class PatientController {
     public String showUpdateForm(@PathVariable Long id, Model model) {
         PatientResponseDTO patientResponseDTO = patientClientApi.findById(id);
         model.addAttribute("patient", patientResponseDTO);
+        RiskResponseDTO riskResponseDTO = riskClientApi.getRisk(id);
+        model.addAttribute("riskLevel", riskResponseDTO.getRiskLevel());
+        log.debug("riskLevel : "+riskResponseDTO.getRiskLevel());
         model.addAttribute("isUpdate", true);
         model.addAttribute("updateId", id); 
         return "patient/edit";

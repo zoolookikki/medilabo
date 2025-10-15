@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 import com.medilabo.webapp.dto.NoteRequestDTO;
 import com.medilabo.webapp.dto.NoteResponseDTO;
@@ -39,7 +40,7 @@ public class NoteClient {
                 log.debug("NoteClient.findByPatientId(id={}) -> no notes found", patientId);
             }
             return notes;
-        } catch (org.springframework.web.client.RestClientResponseException e) {
+        } catch (RestClientResponseException e) {
             log.error("NoteClient.findByPatientId(id={}) -> Note service unavailable", patientId, e);
             throw new NoteServiceUnavailableException("Note service unavailable", e);
         }
@@ -56,7 +57,7 @@ public class NoteClient {
                     .body(NoteResponseDTO.class);
             log.debug("NoteClient.create() -> created note: {}", created);
             return created;
-        } catch (org.springframework.web.client.RestClientResponseException e) {
+        } catch (RestClientResponseException e) {
             log.error("NoteClient.create() -> Note service unavailable", e);
             throw new NoteServiceUnavailableException("Note service unavailable", e);
         }

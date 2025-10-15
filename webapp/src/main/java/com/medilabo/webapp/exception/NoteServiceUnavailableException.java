@@ -3,8 +3,8 @@ package com.medilabo.webapp.exception;
 import java.io.Serial;
 
 /**
- * Exception levée lorsque le service Patient est indisponible
- * (ex: la gateway répond mais ne parvient pas à joindre le microservice patient).
+ * Exception levée lorsque le service Note est indisponible
+ * (ex: la gateway répond mais ne parvient pas à joindre le microservice Note).
  */
 public class NoteServiceUnavailableException extends RuntimeException {
     @Serial

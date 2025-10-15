@@ -8,9 +8,13 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.ResourceAccessException;
 
+import lombok.extern.log4j.Log4j2;
+
 @ControllerAdvice
+@Log4j2
 public class GlobalExceptionHandler {
 
+    
     // Gateway injoignable
     @ExceptionHandler({ ConnectException.class, UnknownHostException.class, ResourceAccessException.class })
     public String handleGatewayDown(Exception ex, Model model) {    
@@ -18,26 +22,31 @@ public class GlobalExceptionHandler {
         return "error";
     }
 
-    // Services Patient ou Note injoignables ou autre erreur (par exemple : erreur de programmation concernant l'appel aux API).
-    @ExceptionHandler({PatientServiceUnavailableException.class, NoteServiceUnavailableException.class})
+    // Services Patient ou Note ou Risk injoignables ou autre erreur (par exemple : erreur de programmation concernant l'appel aux API).
+    @ExceptionHandler({PatientServiceUnavailableException.class, NoteServiceUnavailableException.class, RiskServiceUnavailableException.class})
     public String handleServiceDown(RuntimeException ex, Model model) {
-        String service_name = (ex instanceof PatientServiceUnavailableException) ? "Patient" : "Note";
-        String msg = service_name + " service unavailable. Please try again later.";
+        String serviceName =
+                (ex instanceof PatientServiceUnavailableException) ? "Patient" :
+                (ex instanceof NoteServiceUnavailableException)    ? "Note"    :
+                                                                     "Risk";
+        String msg = serviceName + " service unavailable. Please try again later.";
 
         // pour trouver l'origine de l'exception du client REST
         Throwable cause = ex.getCause();
         // si l'origine de l'exception est une erreur http renvoyée par le client REST.
         if (cause instanceof org.springframework.web.client.RestClientResponseException rce) {
-            // si 5xx -> on affiche un message simple et explicite
+
+            // si 5xx -> on log uniquement.
             if (rce.getStatusCode().is5xxServerError()) {
-                msg = service_name + " service is not started or unreachable behind the gateway.";
+                log.warn("{} returned 5xx via gateway: {}", serviceName, rce.getStatusText());
             }
             // si 4xx -> on affiche un message plus précis si disponible
             else if (rce.getStatusCode().is4xxClientError()) {
                 String details = rce.getResponseBodyAsString();
-                msg = service_name + " service error (" + rce.getStatusCode().value() + " " + rce.getStatusText() + ")."
+                msg = serviceName + " service error (" + rce.getStatusCode().value() + " " + rce.getStatusText() + ")."
                         + (details == null || details.isBlank() ? "" : " Details: " + details);
             }
+            
         }
 
         model.addAttribute("message", msg);

@@ -7,7 +7,6 @@ import java.io.Serial;
  * (ex: la gateway répond mais ne parvient pas à joindre le microservice patient).
  */
 public class PatientServiceUnavailableException extends RuntimeException {
-
     @Serial
     private static final long serialVersionUID = 1L;
 

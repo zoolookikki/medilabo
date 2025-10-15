@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 import com.medilabo.webapp.dto.PatientRequestDTO;
 import com.medilabo.webapp.dto.PatientResponseDTO;
@@ -39,7 +40,7 @@ public class PatientClient {
             return patients;
 
         // attention ici, bien faire la distinction sinon on ne sait pas si c'est la gateway ou le microservice Patient qui n'a pas répondu.
-        } catch (org.springframework.web.client.RestClientResponseException e) {
+        } catch (RestClientResponseException e) {
             // Si on arrive ici, c'est que la gateway a répondu (sinon ce serait une ConnectException).
             log.error("PatientClient.findAll() -> Patient service unavailable", e);
             throw new PatientServiceUnavailableException("Patient service unavailable", e);
@@ -64,7 +65,7 @@ public class PatientClient {
 
             return patient;
 
-        } catch (org.springframework.web.client.RestClientResponseException e) {
+        } catch (RestClientResponseException e) {
             log.error("PatientClient.findById(id={}) -> Patient service unavailable", id, e);
             throw new PatientServiceUnavailableException("Patient service unavailable", e);
         }
@@ -89,7 +90,7 @@ public class PatientClient {
 
             return created;
 
-        } catch (org.springframework.web.client.RestClientResponseException e) {
+        } catch (RestClientResponseException e) {
             log.error("PatientClient.create() -> Patient service unavailable", e);
             throw new PatientServiceUnavailableException("Patient service unavailable", e);
         }
@@ -114,7 +115,7 @@ public class PatientClient {
 
             return updated;
 
-        } catch (org.springframework.web.client.RestClientResponseException e) {
+        } catch (RestClientResponseException e) {
             log.error("PatientClient.update(id={}) -> Patient service unavailable", id, e);
             throw new PatientServiceUnavailableException("Patient service unavailable", e);
         }
