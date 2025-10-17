@@ -34,11 +34,8 @@ public class NoteClient {
                     // Sans cela, il y avait un warning car body(List.class) retournait une List<LinkedHashMap> qu’il aurait fallu ensuite convertir manuellement.
 //                    .body(List.class);
                     .body(new ParameterizedTypeReference<List<NoteResponseDTO>>() {});
-            if (notes.size() > 0) {
-                log.debug("NoteClient.findByPatientId(id={}) -> notes found: {}", patientId, notes);
-            } else {
-                log.debug("NoteClient.findByPatientId(id={}) -> no notes found", patientId);
-            }
+            
+            log.debug("NoteClient.findByPatientId(id={}) -> notes size: {} {}", patientId, notes.size(), notes);
             return notes;
         // Note a répondu 4xx/5xx
         } catch (org.springframework.web.client.RestClientResponseException e) {
