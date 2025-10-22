@@ -52,6 +52,3 @@ public class PatientClient {
         }
     }
 }
-
-//log.error("PatientClient.findById(id={}) -> Patient service unavailable", id, e);
-

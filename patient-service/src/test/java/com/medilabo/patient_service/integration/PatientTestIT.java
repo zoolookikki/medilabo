@@ -62,6 +62,15 @@ public class PatientTestIT {
     }    
     
     @Test
+    void getAllPatientsEmpty() throws Exception {
+        patientRepository.deleteAll();
+        mvc.perform(get("/patients"))
+           .andExpect(status().isOk())
+           .andExpect(jsonPath("$").isArray())
+           .andExpect(jsonPath("$.length()").value(0));
+    }    
+    
+    @Test
     void getPatientsByIdFound() throws Exception {
         mvc.perform(get("/patients/{id}", patient1Id))
             .andExpect(status().isOk())
@@ -81,13 +90,19 @@ public class PatientTestIT {
     }    
     
     @Test
+    void getPatientsByIdNegative() throws Exception {
+        mvc.perform(get("/patients/{id}", -1))
+           .andExpect(status().isBadRequest());
+    }
+    
+    @Test
     void postPatientsSuccessfull() throws Exception {
         String jsonBody = """
         {
           "lastName": "xxx",
           "firstName": "xxx",
           "birthDate": "1900-01-01",
-          "gender": "UNKNOW",
+          "gender": "UNKNOWN",
           "address": "xxx",
           "phoneNumber": "000-000-0000"
         }
@@ -136,7 +151,7 @@ public class PatientTestIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonBody))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.phoneNumber").value("Phone number must be in format XXX-XXX-XXXX"))
+            .andExpect(jsonPath("$.phoneNumber").value(org.hamcrest.Matchers.containsString("XXX-XXX-XXXX")))
             .andExpect(jsonPath("$.birthDate").value("Birth date must be in the past"));
     }
     

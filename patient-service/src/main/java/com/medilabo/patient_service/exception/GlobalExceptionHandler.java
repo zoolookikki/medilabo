@@ -79,7 +79,7 @@ public class GlobalExceptionHandler {
         }
 
         return ResponseEntity
-                .badRequest()
+                .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of(field, "Invalid value/format"));    
     }
     

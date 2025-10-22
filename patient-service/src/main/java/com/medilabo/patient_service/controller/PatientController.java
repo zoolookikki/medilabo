@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,7 @@ import com.medilabo.patient_service.dto.PatientResponseDTO;
 import com.medilabo.patient_service.service.PatientService;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -26,6 +28,7 @@ import lombok.extern.log4j.Log4j2;
 @RequestMapping("/patients") 
 // Coupler @RequiredArgsConstructor avec des champs final pour rendre les dépendances immuables ==> mieux que @Autowired devenu obsolète.
 @RequiredArgsConstructor
+@Validated
 public class PatientController {
     
     private final PatientService patientService;
@@ -38,7 +41,7 @@ public class PatientController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<PatientResponseDTO> getPatientById(@PathVariable Long id) {
+    public ResponseEntity<PatientResponseDTO> getPatientById(@PathVariable @Positive Long id) {
         log.debug("GET/patients(id),id="+id);
         Optional<PatientResponseDTO> patient = patientService.getById(id);
 
@@ -62,7 +65,7 @@ public class PatientController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PatientResponseDTO> updatePatient(@PathVariable Long id, @Valid @RequestBody PatientRequestDTO req) {
+    public ResponseEntity<PatientResponseDTO> updatePatient(@PathVariable @Positive Long id, @Valid @RequestBody PatientRequestDTO req) {
         log.debug("PUT/patients(id),id="+id+ " : "+req);
         Optional<PatientResponseDTO> updatedPatient = patientService.update(id, req);
 

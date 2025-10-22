@@ -21,6 +21,7 @@ import com.medilabo.webapp.dto.Gender;
 import com.medilabo.webapp.dto.NoteRequestDTO;
 import com.medilabo.webapp.dto.NoteResponseDTO;
 import com.medilabo.webapp.dto.PatientResponseDTO;
+import com.medilabo.webapp.exception.NoteServiceUnavailableException;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -78,6 +79,19 @@ class NoteControllerTest {
     }
 
     @Test
+    @DisplayName("Liste notes vide")
+    void displayEmptyList() throws Exception {
+        when(patientClient.findById(1L)).thenReturn(patientResponseDTO1);
+        when(noteClient.findByPatientId(1L)).thenReturn(List.of());
+
+        mvc.perform(get("/notes/patient/1"))
+           .andExpect(status().isOk())
+           .andExpect(view().name("note/list"))
+           .andExpect(model().attributeExists("patient"))
+           .andExpect(model().attributeExists("notes"));
+    }
+    
+    @Test
     @DisplayName("Affichage du formulaire pour la création")
     void showCreateForm_ok() throws Exception {
         when(patientClient.findById(1L)).thenReturn(patientResponseDTO1);
@@ -116,5 +130,18 @@ class NoteControllerTest {
            .andExpect(model().errorCount(1))
            // le 1er argument est le nom de l’attribut de modèle.
            .andExpect(model().attributeHasFieldErrors("note", "content"));
+    }
+    
+    @Test
+    @DisplayName("Erreur du service Note quand affichage de la liste des notes pour un patient")
+    void displayListNoteServiceError() throws Exception {
+        when(patientClient.findById(1L)).thenReturn(patientResponseDTO1);
+        when(noteClient.findByPatientId(1L)).thenThrow(new NoteServiceUnavailableException("Note service unavailable")); 
+
+        mvc.perform(get("/notes/patient/1"))
+           .andExpect(status().isOk())
+           .andExpect(view().name("error"))
+           .andExpect(model().attribute("message",
+                   org.hamcrest.Matchers.containsString("Note service unavailable")));
     }
 }

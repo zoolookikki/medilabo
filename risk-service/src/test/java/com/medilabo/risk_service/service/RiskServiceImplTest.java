@@ -22,8 +22,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @Log4j2
@@ -85,7 +85,7 @@ class RiskriskServiceImplTest {
                 ));
         assertEquals(RiskLevel.NONE, riskService.getRisk(1L).getRiskLevel());
     }
-
+    
     @Test 
     @DisplayName("1 déclencheur et âge >=30 => NONE")
     void noneWhenAgeGteOrEqual30AndOneTrigger() {

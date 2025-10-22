@@ -91,6 +91,8 @@ public class PatientController {
             // on ré-affiche le formulaire avec les erreurs
             model.addAttribute("isUpdate", true);
             model.addAttribute("updateId", id); 
+            RiskResponseDTO riskResponseDTO = riskClientApi.getRisk(id);
+            model.addAttribute("riskLevel", riskResponseDTO.getRiskLevel());
             return "patient/edit";
         }        
         patientClientApi.update(id, patientRequestDTO);

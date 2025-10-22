@@ -4,9 +4,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-
-import org.springframework.http.converter.HttpMessageNotReadableException;
-
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.log4j.Log4j2;
 
@@ -53,6 +50,7 @@ public class GlobalExceptionHandler {
      * This typically occurs before @Valid validations are triggered,
      * when Jackson fails to convert JSON values to the target object fields.
      */
+/*    
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, String>> handleNotReadable(HttpMessageNotReadableException ex) {
         String field = "unknown";
@@ -79,9 +77,10 @@ public class GlobalExceptionHandler {
         }
 
         return ResponseEntity
-                .badRequest()
+                .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of(field, "Invalid value/format"));    
     }
+*/
     
     /**
      * To catch exceptions on @Validated which enables validation on parameters with @PathVariable and @RequestParam.

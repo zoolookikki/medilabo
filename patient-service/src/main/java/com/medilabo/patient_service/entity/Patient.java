@@ -13,7 +13,7 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class Patient {
-  public enum Gender { MALE, FEMALE, UNKNOW }
+  public enum Gender { MALE, FEMALE, UNKNOWN }
 
   @Id 
   @GeneratedValue(strategy = GenerationType.IDENTITY)

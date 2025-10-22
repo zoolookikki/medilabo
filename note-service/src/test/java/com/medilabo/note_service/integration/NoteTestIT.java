@@ -57,6 +57,12 @@ class NoteTestIT {
         mvc.perform(get("/notes/patient/{patientId}", "xxx"))
             .andExpect(status().isBadRequest());
     }
+    
+    @Test
+    void getNotesByIdNegative() throws Exception {
+        mvc.perform(get("/notes/patient/{patientId}", -1))
+           .andExpect(status().isBadRequest());
+    }
 
     @Test
     void getNotesByPatientIdReturn200WithContent() throws Exception {

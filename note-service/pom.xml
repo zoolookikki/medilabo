@@ -140,15 +140,6 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
-                        
-                        <configuration>
-                            <excludes>
-                                <exclude>**/domain/**</exclude>
-                                <exclude>**/dto/**</exclude>
-                                <exclude>**/mapper/**</exclude>
-                            </excludes>
-                        </configuration>
-                        
                     </execution>
                 </executions>
             </plugin>            
@@ -245,15 +236,6 @@
                             <report>report</report>
                             <report>report-integration</report>
                         </reports>
-                        
-                        <configuration>
-                            <excludes>
-                                <exclude>**/domain/**</exclude>
-                                <exclude>**/dto/**</exclude>
-                                <exclude>**/mapper/**</exclude>
-                            </excludes>
-                        </configuration>                        
-                        
                     </reportSet>
                 </reportSets>
             </plugin>

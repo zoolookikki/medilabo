@@ -12,9 +12,16 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.medilabo.webapp.client.PatientClient;
+import com.medilabo.webapp.client.RiskClient;
 import com.medilabo.webapp.dto.Gender;
 import com.medilabo.webapp.dto.PatientRequestDTO;
 import com.medilabo.webapp.dto.PatientResponseDTO;
+import com.medilabo.webapp.dto.RiskLevel;
+import com.medilabo.webapp.dto.RiskResponseDTO;
+import com.medilabo.webapp.exception.PatientServiceUnavailableException;
+import com.medilabo.webapp.exception.RiskServiceUnavailableException;
+
+import lombok.extern.log4j.Log4j2;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,11 +35,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 
 @WebMvcTest(PatientController.class)
+@Log4j2
 public class PatientControllerTest {
 
     // @Autowired pour Junit5, c'est plus simple.
     @Autowired MockMvc mvc;
     @MockitoBean PatientClient patientClient;   
+    @MockitoBean RiskClient riskClient;
 
     private PatientResponseDTO patientResponseDTO1;
     
@@ -106,6 +115,7 @@ public class PatientControllerTest {
     @DisplayName("Affichage du formulaire pour la modification")
     void showUpdateForm() throws Exception {
         when(patientClient.findById(patientResponseDTO1.getId())).thenReturn(patientResponseDTO1);
+        when(riskClient.getRisk(1L)).thenReturn(new RiskResponseDTO(1L, RiskLevel.NONE));
 
         mvc.perform(get("/patients/1"))
             .andExpect(status().isOk())
@@ -120,11 +130,12 @@ public class PatientControllerTest {
     void updateOK() throws Exception {
         when(patientClient.update(eq(1L), any(PatientRequestDTO.class))).thenReturn(patientResponseDTO1);
 
+        //log.debug("----- start mise à jour réussie -----");
         mvc.perform(post("/patients/1/edit")
                 .param("lastName", "Doee")
                 .param("firstName", "Johnny")
                 .param("birthDate", "1963-01-02")
-                .param("gender", "UNKNOW"))
+                .param("gender", "UNKNOWN"))
             .andExpect(redirectedUrl("/patients"))
             .andExpect(flash().attributeExists("successMessage"));
     }
@@ -132,6 +143,8 @@ public class PatientControllerTest {
     @Test
     @DisplayName("Modification en échec")
     void updateHS() throws Exception {
+        when(riskClient.getRisk(1L)).thenReturn(new RiskResponseDTO(1L, RiskLevel.NONE));
+        
         mvc.perform(post("/patients/1/edit")
                 .param("lastName", "")
                 .param("firstName", "")
@@ -146,5 +159,29 @@ public class PatientControllerTest {
             .andExpect(model().attributeHasFieldErrors(
                     "patient", "lastName", "firstName", "birthDate", "gender", "phoneNumber"
             ));
+    }
+
+    @Test
+    @DisplayName("Erreur du service Patient quand affichage de la liste des patients")
+    void displayListPatientServiceError() throws Exception {
+        when(patientClient.findAll()).thenThrow(new PatientServiceUnavailableException("Patient service unavailable"));
+        mvc.perform(get("/patients"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("error"))
+            .andExpect(model().attribute("message",
+                    org.hamcrest.Matchers.containsString("Patient service unavailable")));
+    }
+
+    @Test
+    @DisplayName("Erreur du service Risk quand affichage du formulaire pour la modification")
+    void showUpdateRiskServiceError() throws Exception {
+        when(patientClient.findById(1L)).thenReturn(patientResponseDTO1);
+        when(riskClient.getRisk(1L)).thenThrow(new RiskServiceUnavailableException("Risk service unavailable"));
+
+        mvc.perform(get("/patients/1"))
+           .andExpect(status().isOk())
+           .andExpect(view().name("error"))
+           .andExpect(model().attribute("message",
+                   org.hamcrest.Matchers.containsString("Risk service unavailable")));
     }
 }

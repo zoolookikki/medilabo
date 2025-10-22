@@ -25,4 +25,9 @@ public class RiskController {
         log.debug("GET/risk(id),patientId="+patientId);
         return ResponseEntity.ok(riskService.getRisk(patientId));
     }
+    
+    @GetMapping("/simulate500")
+    public String simulate500() {
+        throw new RuntimeException("Simulation d'erreur interne");
+    }    
 }
