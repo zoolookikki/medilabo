@@ -6,27 +6,44 @@ import org.springframework.web.client.RestClient;
 import com.medilabo.risk_service.dto.PatientResponseDTO;
 import com.medilabo.risk_service.exception.PatientServiceUnavailableException;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 
 @Component
-//Coupler @RequiredArgsConstructor avec des champs final pour rendre les dépendances immuables ==> mieux que @Autowired devenu obsolète.
-@RequiredArgsConstructor
 @Log4j2
 public class PatientClient {
     // RestClient est synchrone : l’appel bloquera jusqu’à la réponse.
     private final RestClient rest;
-    @Value("${medilabo.patient.url.api}") private String base;
 
+    // ce constructeur est appelé gràce à l'annotation @Component : il est utilisé par Spring.
+    // le bean RestClient.Builder est fourni par Spring Boot.   
+    public PatientClient(RestClient.Builder builder,
+            @Value("${medilabo.patient.url.api}") String baseUrl,
+            @Value("${security.api.username}") String userName,
+            @Value("${security.api.password}") String password) {
+
+        // encodage pour mettre userName et password dans le header : HttpHeaders.AUTHORIZATION impose cela.
+        String basic = Base64.getEncoder()
+                .encodeToString((userName + ":" + password).getBytes(StandardCharsets.UTF_8));
+
+        this.rest = builder
+                .baseUrl(baseUrl)
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
+                .build();
+    }
+    
     public PatientResponseDTO findById(Long id) {
         try {
             log.debug("PatientClient.findById");
 
             PatientResponseDTO patient = rest
                 .get()
-                .uri(base + "/patients/{id}", id)
+                .uri("/patients/{id}", id)
                 .retrieve()
                 .body(PatientResponseDTO.class);
 

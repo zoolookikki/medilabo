@@ -12,6 +12,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.security.test.context.support.WithMockUser;
+// static car csrf() est une méthode static de la classe.
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -32,6 +35,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 
 @WebMvcTest(NoteController.class)
+// pour simuler un utilisateur.
+@WithMockUser
 class NoteControllerTest {
 
     // @Autowired pour Junit5, c'est plus simple.
@@ -109,6 +114,7 @@ class NoteControllerTest {
         when(noteClient.create(any(NoteRequestDTO.class))).thenReturn(noteResponseDTO1);
 
         mvc.perform(post("/notes")
+                .with(csrf())
                 .param("patientId", "1")
                 .param("content", "Line 1\nLine 2"))
            .andExpect(redirectedUrl("/notes/patient/1"))
@@ -122,6 +128,7 @@ class NoteControllerTest {
         when(patientClient.findById(1L)).thenReturn(patientResponseDTO1);
 
         mvc.perform(post("/notes")
+                .with(csrf())
                 .param("patientId", "1")
                 .param("content", ""))
            .andExpect(status().isOk())

@@ -8,6 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.security.test.context.support.WithMockUser;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -36,6 +38,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(PatientController.class)
 @Log4j2
+//pour simuler un utilisateur.
+@WithMockUser
 public class PatientControllerTest {
 
     // @Autowired pour Junit5, c'est plus simple.
@@ -84,6 +88,7 @@ public class PatientControllerTest {
         when(patientClient.create(any(PatientRequestDTO.class))).thenReturn(patientResponseDTO1);
 
         mvc.perform(post("/patients")
+                .with(csrf())
                 .param("lastName", "Doe")
                 .param("firstName", "John")
                 .param("birthDate", "1963-01-01")
@@ -97,6 +102,7 @@ public class PatientControllerTest {
     void createHS() throws Exception {
         // les 4 champs obligatoire.
         mvc.perform(post("/patients") 
+                .with(csrf())
                 .param("lastName", "")
                 .param("firstName", "")
                 .param("birthDate", "")
@@ -132,6 +138,7 @@ public class PatientControllerTest {
 
         //log.debug("----- start mise à jour réussie -----");
         mvc.perform(post("/patients/1/edit")
+                .with(csrf())
                 .param("lastName", "Doee")
                 .param("firstName", "Johnny")
                 .param("birthDate", "1963-01-02")
@@ -146,6 +153,7 @@ public class PatientControllerTest {
         when(riskClient.getRisk(1L)).thenReturn(new RiskResponseDTO(1L, RiskLevel.NONE));
         
         mvc.perform(post("/patients/1/edit")
+                .with(csrf())
                 .param("lastName", "")
                 .param("firstName", "")
                 .param("birthDate", "")

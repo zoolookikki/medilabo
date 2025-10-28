@@ -1,15 +1,18 @@
 package com.medilabo.note_service.integration;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import com.medilabo.note_service.document.Note;
 import com.medilabo.note_service.repository.NoteRepository;
@@ -19,6 +22,12 @@ import com.medilabo.note_service.repository.NoteRepository;
 @AutoConfigureMockMvc
 //pour utiliser application-test.properties (écrase certaines valeurs de application.properties).
 @ActiveProfiles("test")
+/*
+On aurait pu utiliser @WithMockUser, dans ce cas Spring Security crée un utilisateur fictif qui est considéré comme identifié dans l'application.
+@WithMockUser(username = "user1@test.com", roles = "USER")
+Plutôt utilisé pour les tests métier/contrôleur sans tester l’auth.
+Ici, il faut tester tester réellement l'authentification => méthode 
+*/
 class NoteTestIT {
     // @Autowired pour Junit5, c'est plus simple.
     @Autowired MockMvc mvc;
@@ -26,6 +35,17 @@ class NoteTestIT {
     
     private String note1Id;
     
+    @Value("${security.api.username}") private String username;
+    @Value("${security.api.password}") private String password; 
+
+    private RequestPostProcessor basicAuthentication() {
+        return httpBasic(username, password);
+    }
+    
+    private RequestPostProcessor badBasicAuthentication() {
+        return httpBasic("hs", "hs");
+    }
+
     @BeforeEach
     void setup() {
         // pour nettoyer la base à chaque fois.
@@ -40,7 +60,7 @@ class NoteTestIT {
 
     @Test
     void geNotesByIdFound() throws Exception {
-        mvc.perform(get("/notes/{id}", note1Id))
+        mvc.perform(get("/notes/{id}", note1Id).with(basicAuthentication()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(note1Id))
             .andExpect(jsonPath("$.patientId").value(1));
@@ -48,25 +68,25 @@ class NoteTestIT {
 
     @Test
     void getNotesByIdNotFound() throws Exception {
-        mvc.perform(get("/notes/{id}", "not exist"))
+        mvc.perform(get("/notes/{id}", "not exist").with(basicAuthentication()))
             .andExpect(status().isNotFound());
     }
     
     @Test
     void getNotesByPatientIdNotNumeric() throws Exception {
-        mvc.perform(get("/notes/patient/{patientId}", "xxx"))
+        mvc.perform(get("/notes/patient/{patientId}", "xxx").with(basicAuthentication()))
             .andExpect(status().isBadRequest());
     }
     
     @Test
     void getNotesByIdNegative() throws Exception {
-        mvc.perform(get("/notes/patient/{patientId}", -1))
+        mvc.perform(get("/notes/patient/{patientId}", -1).with(basicAuthentication()))
            .andExpect(status().isBadRequest());
     }
 
     @Test
     void getNotesByPatientIdReturn200WithContent() throws Exception {
-        mvc.perform(get("/notes/patient/{patientId}", 2))
+        mvc.perform(get("/notes/patient/{patientId}", 2).with(basicAuthentication()))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith("application/json"))
             .andExpect(jsonPath("$").isArray())
@@ -77,7 +97,7 @@ class NoteTestIT {
 
     @Test
     void getNotesByPatientIdReturn200WithEmptyList() throws Exception {
-        mvc.perform(get("/notes/patient/{patientId}", 99))
+        mvc.perform(get("/notes/patient/{patientId}", 99).with(basicAuthentication()))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith("application/json"))
             .andExpect(jsonPath("$").isArray())
@@ -93,7 +113,7 @@ class NoteTestIT {
           }
           """;
 
-        mvc.perform(post("/notes")
+        mvc.perform(post("/notes").with(basicAuthentication())
                 .contentType("application/json")
                 .content(jsonBody))
             .andExpect(status().isCreated())
@@ -110,7 +130,7 @@ class NoteTestIT {
         }
         """;
 
-        mvc.perform(post("/notes")
+        mvc.perform(post("/notes").with(basicAuthentication())
                 .contentType("application/json")
                 .content(jsonBody))
             .andExpect(status().isBadRequest())
@@ -120,13 +140,27 @@ class NoteTestIT {
     
     @Test
     void getBadPath() throws Exception {
+        mvc.perform(get("/note/{id}", note1Id).with(basicAuthentication()))
+            .andExpect(status().isForbidden());   // 403
+            mvc.perform(get("/note/{id}", note1Id))            
+            .andExpect(status().isUnauthorized()); // 401
+    }    
+    
+    @Test
+    void unauthorizedWhenNoAuth() throws Exception {
         mvc.perform(get("/note/{id}", note1Id))
-            .andExpect(status().isNotFound());
+        .andExpect(status().isUnauthorized()); // 401
+    }    
+
+    @Test
+    void badAuthentification() throws Exception {
+        mvc.perform(get("/note/{id}", note1Id).with(badBasicAuthentication()))
+        .andExpect(status().isUnauthorized()); // 401
     }    
     
     @Test
     void getSimulateInternalError() throws Exception {
-        mvc.perform(get("/notes/simulate500"))
+        mvc.perform(get("/notes/simulate500").with(basicAuthentication()))
             .andExpect(status().isInternalServerError());
     }
 }

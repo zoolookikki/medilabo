@@ -5,11 +5,15 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import org.springframework.http.MediaType;
@@ -27,6 +31,12 @@ Spring Boot génère automatiquement le schéma à partir de ce qui est déclar�
 @AutoConfigureMockMvc
 // pour utiliser application-test.properties (écrase certaines valeurs de application.properties).
 @ActiveProfiles("test")
+/*
+On aurait pu utiliser @WithMockUser, dans ce cas Spring Security crée un utilisateur fictif qui est considéré comme identifié dans l'application.
+@WithMockUser(username = "user1@test.com", roles = "USER")
+Plutôt utilisé pour les tests métier/contrôleur sans tester l’auth.
+Ici, il faut tester tester réellement l'authentification => méthode 
+*/
 public class PatientTestIT {
     
     // @Autowired pour Junit5, c'est plus simple.
@@ -38,6 +48,17 @@ public class PatientTestIT {
     private Long patient1Id;
     private Long patient2Id;
     
+    @Value("${security.api.username}") private String username;
+    @Value("${security.api.password}") private String password; 
+
+    private RequestPostProcessor basicAuthentication() {
+        return httpBasic(username, password);
+    }
+    
+    private RequestPostProcessor badBasicAuthentication() {
+        return httpBasic("hs", "hs");
+    }
+
     @BeforeEach
     void setup() {
         // pour nettoyer la base à chaque fois.
@@ -50,7 +71,7 @@ public class PatientTestIT {
 
     @Test
     void getAllPatients() throws Exception {
-        mvc.perform(get("/patients"))
+        mvc.perform(get("/patients").with(basicAuthentication()))
            .andExpect(status().isOk())
            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
            .andExpect(jsonPath("$").isArray())
@@ -64,7 +85,7 @@ public class PatientTestIT {
     @Test
     void getAllPatientsEmpty() throws Exception {
         patientRepository.deleteAll();
-        mvc.perform(get("/patients"))
+        mvc.perform(get("/patients").with(basicAuthentication()))
            .andExpect(status().isOk())
            .andExpect(jsonPath("$").isArray())
            .andExpect(jsonPath("$.length()").value(0));
@@ -72,26 +93,26 @@ public class PatientTestIT {
     
     @Test
     void getPatientsByIdFound() throws Exception {
-        mvc.perform(get("/patients/{id}", patient1Id))
+        mvc.perform(get("/patients/{id}", patient1Id).with(basicAuthentication()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(patient1Id));
     }    
     
     @Test
     void getPatientsByIdNotFound() throws Exception {
-        mvc.perform(get("/patients/{id}", 99))
+        mvc.perform(get("/patients/{id}", 99).with(basicAuthentication()))
             .andExpect(status().isNotFound());
     }    
 
     @Test
     void getPatientsByIdNotNumeric() throws Exception {
-        mvc.perform(get("/patients/xxx"))
+        mvc.perform(get("/patients/xxx").with(basicAuthentication()))
             .andExpect(status().isBadRequest());
     }    
     
     @Test
     void getPatientsByIdNegative() throws Exception {
-        mvc.perform(get("/patients/{id}", -1))
+        mvc.perform(get("/patients/{id}", -1).with(basicAuthentication()))
            .andExpect(status().isBadRequest());
     }
     
@@ -108,7 +129,7 @@ public class PatientTestIT {
         }
         """;
         
-        mvc.perform(post("/patients")
+        mvc.perform(post("/patients").with(basicAuthentication())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonBody))
            .andExpect(status().isCreated())
@@ -125,7 +146,7 @@ public class PatientTestIT {
         }
         """;
         
-        mvc.perform(post("/patients")
+        mvc.perform(post("/patients").with(basicAuthentication())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonBody))
             .andExpect(status().isBadRequest())
@@ -147,7 +168,7 @@ public class PatientTestIT {
         }
         """;
         
-        mvc.perform(post("/patients")
+        mvc.perform(post("/patients").with(basicAuthentication())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonBody))
             .andExpect(status().isBadRequest())
@@ -166,7 +187,7 @@ public class PatientTestIT {
         }
         """;
         
-        mvc.perform(post("/patients")
+        mvc.perform(post("/patients").with(basicAuthentication())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonBody))
             .andExpect(status().isBadRequest())
@@ -181,7 +202,7 @@ public class PatientTestIT {
         }
         """;
         
-        mvc.perform(post("/patients")
+        mvc.perform(post("/patients").with(basicAuthentication())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonBody))
             .andExpect(status().isBadRequest())
@@ -201,7 +222,7 @@ public class PatientTestIT {
         }
         """;
         
-        mvc.perform(put("/patients/{id}", patient2Id)
+        mvc.perform(put("/patients/{id}", patient2Id).with(basicAuthentication())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonBody))
            .andExpect(status().isOk())
@@ -213,7 +234,7 @@ public class PatientTestIT {
            .andExpect(jsonPath("$.address").value("yyy"))
            .andExpect(jsonPath("$.phoneNumber").value("999-999-9999"));
         
-        mvc.perform(put("/patients/{id}", 99)
+        mvc.perform(put("/patients/{id}", 99).with(basicAuthentication())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonBody))
            .andExpect(status().isNotFound());
@@ -221,14 +242,28 @@ public class PatientTestIT {
 
     
     @Test
-    void getBadPath() throws Exception {
-        mvc.perform(get("/patient"))
-           .andExpect(status().isNotFound());
+    void badPath() throws Exception {
+        mvc.perform(get("/patient").with(basicAuthentication()))
+        .andExpect(status().isForbidden());   // 403
+        mvc.perform(get("/patient"))            
+        .andExpect(status().isUnauthorized()); // 401
     }    
     
     @Test
+    void unauthorizedWhenNoAuth() throws Exception {
+        mvc.perform(get("/patient"))
+        .andExpect(status().isUnauthorized()); // 401
+    }    
+
+    @Test
+    void badAuthentification() throws Exception {
+        mvc.perform(get("/patient").with(badBasicAuthentication()))
+        .andExpect(status().isUnauthorized()); // 401
+    }    
+
+    @Test
     void getSimulateInternalError() throws Exception {
-        mvc.perform(get("/patients/simulate500"))
+        mvc.perform(get("/patients/simulate500").with(basicAuthentication()))
            .andExpect(status().isInternalServerError());
     }    
 }

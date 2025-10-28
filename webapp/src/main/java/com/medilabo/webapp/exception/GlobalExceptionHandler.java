@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -52,8 +53,14 @@ public class GlobalExceptionHandler {
         model.addAttribute("message", msg);
         return "error";
     }
-
-
+    
+    // 404 path error.
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public String handleNotFound(Exception ex, Model model) {
+        model.addAttribute("message", "Page not found.");
+        return "error"; 
+    }
+   
     // Cas général.
     @ExceptionHandler(Exception.class)
     public String handleAny(Exception ex, Model model) {

@@ -40,4 +40,7 @@ logging:
     org.springframework.cloud.gateway: DEBUG
     # pour voir les requêtes entrantes, les erreurs.
     org.springframework.web: DEBUG
-
+security:
+  api:
+    username: ${MEDILABO_API_USERNAME}
+    password: ${MEDILABO_API_PASSWORD}
