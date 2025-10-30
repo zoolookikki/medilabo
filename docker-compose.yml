@@ -1,0 +1,82 @@
+services:
+  patient-service:
+    # l'image que l'on va démarré.
+    image: patient-service:test
+    # le nom donné pour l'exécution.
+    container_name: patient-service
+    environment:
+      # MySQL est hors container.
+      MEDILABO_PATIENT_SPRING_DATASOURCE_URL: "jdbc:mysql://host.docker.internal:3306/medilabo_patient?serverTimezone=UTC"
+      MEDILABO_PATIENT_SPRING_DATASOURCE_USERNAME: "${MYSQL_USERNAME}"
+      MEDILABO_PATIENT_SPRING_DATASOURCE_PASSWORD: "${MYSQL_PASSWORD}"
+      # Basic authentication idem pour tous les services.
+      MEDILABO_API_USERNAME: "${API_USERNAME}"
+      MEDILABO_API_PASSWORD: "${API_PASSWORD}"
+    # pas d'exposition à l'extérieur.
+    #ports:
+    #  - "8081:8081"
+      
+  note-service:
+    image: note-service:test
+    container_name: note-service
+    environment:
+      # Mongo est hors container.
+      MEDILABO_NOTE_SPRING_DATASOURCE_URI: "mongodb://host.docker.internal:27017/medilabo_note"
+      MEDILABO_NOTE_USERNAME: "${MONGO_USERNAME}"
+      MEDILABO_NOTE_PASSWORD: "${MONGO_PASSWORD}"
+      # Basic authentication idem pour tous les services.
+      MEDILABO_API_USERNAME: "${API_USERNAME}"
+      MEDILABO_API_PASSWORD: "${API_PASSWORD}"
+    # pas d'exposition à l'extérieur.
+    #ports:
+    #  - "8083:8083"
+
+  risk-service:
+    image: risk-service:test
+    container_name: risk-service
+    # ordre de démarrage non garantit, par sécurité, on demande à ce que ces services soient démarrés.
+    depends_on:
+      - patient-service
+      - note-service
+    environment:
+      # Docker crée un DNS interne : chaque service est joignable par son nom de service.
+      MEDILABO_PATIENT_URL_API: "http://patient-service:8081"
+      MEDILABO_NOTE_URL_API:   "http://note-service:8083"
+      # Basic authentication idem pour tous les services.
+      MEDILABO_API_USERNAME: "${API_USERNAME}"
+      MEDILABO_API_PASSWORD: "${API_PASSWORD}"
+    # pas d'exposition à l'extérieur.
+    #ports:
+    #  - "8084:8084"
+
+  gateway-service:
+    image: gateway-service:test
+    container_name: gateway-service
+    depends_on:
+      - patient-service
+      - note-service
+      - risk-service
+    environment:
+      MEDILABO_PATIENT_URL_API: "http://patient-service:8081"
+      MEDILABO_NOTE_URL_API:   "http://note-service:8083"
+      MEDILABO_RISK_URL_API:   "http://risk-service:8084"
+      # Basic authentication idem pour tous les services.
+      MEDILABO_API_USERNAME: "${API_USERNAME}"
+      MEDILABO_API_PASSWORD: "${API_PASSWORD}"
+    # on expose à l'extérieur que la gateway et la webapp
+    ports:
+      - "8080:8080"
+
+  webapp:
+    image: webapp:test
+    container_name: webapp
+    depends_on:
+      - gateway-service
+    environment:
+      MEDILABO_URL_API: "http://gateway-service:8080/api"
+      # Basic authentication idem pour tous les services.
+      MEDILABO_API_USERNAME: "${API_USERNAME}"
+      MEDILABO_API_PASSWORD: "${API_PASSWORD}"
+    # on expose à l'extérieur que la gateway et la webapp
+    ports:
+      - "8082:8082"
