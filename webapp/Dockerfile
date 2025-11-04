@@ -1,5 +1,6 @@
 # Utilisation de cette versiion du JRE pour l'exécution. 
-FROM eclipse-temurin:21-jre
+#FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:21-jre-alpine
 # Toutes les commandes vont être exécutées dans ce répertoire.
 WORKDIR /app
 # Le ...SNAPSHOT.jar est copié et renommé en app.jar (convention standard)

@@ -1,7 +1,8 @@
 services:
   patient-service:
     # l'image que l'on va démarré.
-    image: patient-service:test
+#    image: patient-service:test
+    image: patient-service:min
     # le nom donné pour l'exécution.
     container_name: patient-service
     environment:
@@ -17,7 +18,8 @@ services:
     #  - "8081:8081"
       
   note-service:
-    image: note-service:test
+#    image: note-service:test
+    image: note-service:min
     container_name: note-service
     environment:
       # Mongo est hors container.
@@ -32,7 +34,8 @@ services:
     #  - "8083:8083"
 
   risk-service:
-    image: risk-service:test
+#    image: risk-service:test
+    image: risk-service:min
     container_name: risk-service
     # ordre de démarrage non garantit, par sécurité, on demande à ce que ces services soient démarrés.
     depends_on:
@@ -50,7 +53,8 @@ services:
     #  - "8084:8084"
 
   gateway-service:
-    image: gateway-service:test
+#    image: gateway-service:test
+    image: gateway-service:min
     container_name: gateway-service
     depends_on:
       - patient-service
@@ -68,7 +72,8 @@ services:
       - "8080:8080"
 
   webapp:
-    image: webapp:test
+#    image: webapp:test
+    image: webapp:min
     container_name: webapp
     depends_on:
       - gateway-service
