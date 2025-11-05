@@ -19,7 +19,11 @@ import lombok.extern.log4j.Log4j2;
 @RequiredArgsConstructor
 @Log4j2
 public class PatientClient {
-    // RestClient est synchrone : l’appel bloquera jusqu’à la réponse.
+    // voir remarque dans NoteClient.
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "Spring RestClient is immutable and thread-safe; no internal state exposure."
+    )
     private final RestClient rest;
 
     public List<PatientResponseDTO> findAll() {

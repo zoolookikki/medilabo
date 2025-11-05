@@ -1,6 +1,8 @@
 package com.medilabo.webapp.client;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
@@ -19,26 +21,32 @@ import lombok.extern.log4j.Log4j2;
 @RequiredArgsConstructor
 @Log4j2
 public class NoteClient {
-    // RestClient est synchrone : l’appel bloquera jusqu’à la réponse.
+    /*
+    RestClient est synchrone : l’appel bloquera jusqu’à la réponse.
+    Grâce au build, rest devient immutable donc ne peut plus être modifié.
+    Il faut donc supprimer l'alerte Spotbugs car il ne le voit pas.
+    */
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "Spring RestClient is immutable and thread-safe; no internal state exposure."
+    )
     private final RestClient rest;
 
     public List<NoteResponseDTO> findByPatientId(Long patientId) {
         try {
             log.debug("NoteClient.findByPatientId");
 
-            List<NoteResponseDTO> notes = rest
-                    .get()
-                    .uri("/notes/patient/{patientId}", patientId)
-                    .retrieve()
-                    // Utilisation de ParameterizedTypeReference pour permettre à RestClient de désérialiser correctement une liste typée (List<NoteResponseDTO>).
-                    // Sans cela, il y avait un warning car body(List.class) retournait une List<LinkedHashMap> qu’il aurait fallu ensuite convertir manuellement.
-//                    .body(List.class);
-                    .body(new ParameterizedTypeReference<List<NoteResponseDTO>>() {});
-            if (notes.size() > 0) {
-                log.debug("NoteClient.findByPatientId(id={}) -> notes found: {}", patientId, notes);
-            } else {
-                log.debug("NoteClient.findByPatientId(id={}) -> no notes found", patientId);
-            }
+            List<NoteResponseDTO> notes = Optional.ofNullable(
+                    rest.get()
+                        .uri("/notes/patient/{patientId}", patientId)
+                        .retrieve()
+                        // Utilisation de ParameterizedTypeReference pour permettre à RestClient de désérialiser correctement une liste typée (List<NoteResponseDTO>).
+                        // Sans cela, il y avait un warning car body(List.class) retournait une List<LinkedHashMap> qu’il aurait fallu ensuite convertir manuellement.
+//                        .body(List.class);
+                        .body(new ParameterizedTypeReference<List<NoteResponseDTO>>() {})
+            ).orElseGet(Collections::emptyList);
+
+            log.debug("NoteClient.findByPatientId(id={}) -> notes size: {}", patientId, notes.size());
             return notes;
         } catch (RestClientResponseException e) {
             log.error("NoteClient.findByPatientId(id={}) -> Note service unavailable", patientId, e);

@@ -10,6 +10,7 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestControllerAdvice
 @Log4j2
@@ -39,9 +40,27 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<?> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        String parameterName = ex.getName();  // Nom du paramètre (ex: "station", "id", "address")
+//        String parameterName = ex.getName();  // Nom du paramètre (ex: "station", "id", "address")
+        /*
+        ex.getName() : récupère le nom du paramètre qui a causé l’erreur
+        Optional.ofNullable(...).orElse("unknown") : crée un Optional<String> qui contient la valeur ou si null renvoie "unknown"
+        Equivalent impératif :
+            String name = ex.getName();
+            String parameterName = (name != null) ? name : "unknown";
+        */
+        String parameterName = Optional.ofNullable(ex.getName()).orElse("unknown");        
         
-        String requiredType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "bad value";
+//        String requiredType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "bad value";
+        /*
+        ex.getRequiredType() : renvoie un Class<?>
+        .map(Class::getSimpleName) : transforme le Class<?> en String
+        Equivalent impératif :
+            Class<?> type = ex.getRequiredType();
+            String requiredType = (type != null) ? type.getSimpleName() : "bad value";
+        */
+        String requiredType  = Optional.ofNullable(ex.getRequiredType())
+                .map(Class::getSimpleName)
+                .orElse("bad value");
 
         String errorMessage = String.format(
                 "The '%s' parameter must be of type '%s'.",
@@ -54,7 +73,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(errorMessage);
-    }    
+    }
     
     // Cas général.
     @ExceptionHandler(Exception.class)

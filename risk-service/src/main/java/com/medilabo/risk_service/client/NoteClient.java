@@ -2,7 +2,9 @@ package com.medilabo.risk_service.client;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -42,14 +44,15 @@ public class NoteClient {
         try {
             log.debug("NoteClient.findByPatientId");
 
-            List<NoteResponseDTO> notes = rest
-                    .get()
-                    .uri("/notes/patient/{patientId}", patientId)
-                    .retrieve()
-                    // Utilisation de ParameterizedTypeReference pour permettre à RestClient de désérialiser correctement une liste typée (List<NoteResponseDTO>).
-                    // Sans cela, il y avait un warning car body(List.class) retournait une List<LinkedHashMap> qu’il aurait fallu ensuite convertir manuellement.
-//                    .body(List.class);
-                    .body(new ParameterizedTypeReference<List<NoteResponseDTO>>() {});
+            List<NoteResponseDTO> notes = Optional.ofNullable(
+                    rest.get()
+                        .uri("/notes/patient/{patientId}", patientId)
+                        .retrieve()
+                        // Utilisation de ParameterizedTypeReference pour permettre à RestClient de désérialiser correctement une liste typée (List<NoteResponseDTO>).
+                        // Sans cela, il y avait un warning car body(List.class) retournait une List<LinkedHashMap> qu’il aurait fallu ensuite convertir manuellement.
+//                        .body(List.class);
+                        .body(new ParameterizedTypeReference<List<NoteResponseDTO>>() {})
+            ).orElseGet(Collections::emptyList);
             
             log.debug("NoteClient.findByPatientId(id={}) -> notes size: {} {}", patientId, notes.size(), notes);
             return notes;
