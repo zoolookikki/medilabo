@@ -1,0 +1,4 @@
+#Ignore tout dossier nommé batch ou test à n’importe quel niveau du projet.
+*/batch/
+*/test/
+.env
