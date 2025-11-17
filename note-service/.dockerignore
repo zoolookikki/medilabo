@@ -1,0 +1,82 @@
+# https://www.linkedin.com/pulse/securing-docker-builds-comprehensive-guide-usage-best-ilyas-ou-sbaa/
+
+# =========================
+# Maven
+# =========================
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!target/*.jar
+.mvn/wrapper/maven-wrapper.properties
+
+# =========================
+# IDE files
+# =========================
+# Dossier de config IntelliJ
+.idea/
+# Fichiers de module IntelliJ
+*.iml
+# Fichier de projet Eclipse
+.project
+# Fichier de configuration du classpath Eclipse
+.classpath
+# Dossier Eclipse avec les préférences du projet
+.settings/
+# Dossier de configuration de VSCode
+.vscode/
+
+# =========================
+# OS files
+# =========================
+# Fichier caché généré par macOS dans les dossiers (métadonnées Finder)
+.DS_Store
+# Fichier de cache des miniatures sous Windows
+Thumbs.db
+
+# =========================
+# Logs & temp
+# =========================
+*.log
+# Fichiers temporaires (générés par des outils)
+*.tmp
+
+# =========================
+# Java
+# =========================
+# Fichiers compilés Java : normalement dans target mais couvre le cas ou ils seraient ailleurs par erreur.
+*.class
+
+# =========================
+# Environment & secrets
+# =========================
+# Fichier typique pour stocker des variables d’environnement (mots de passe, URL, etc...)
+.env
+# Variante plus large : n’importe quel fichier xxx.env
+*.env
+# Fichiers de configuration Spring Boot par profil
+application-*.yml
+application-*.properties
+
+# =========================
+# Docker
+# =========================
+# Fichiers PID (Process ID), parfois générés par certaines applis
+*.pid
+# Fichier de composition multi-containers (doit rester en local)
+docker-compose.yml
+
+# =========================
+# Test outputs
+# =========================
+# Certains frameworks (ou plugins) mettent ici les rapports de tests
+/test-output/
+# Rapports générés par Maven Surefire (tests unitaires)
+/surefire-reports/
+# Rapports générés par Maven Failsafe (tests d’intégration)
+/failsafe-reports/
+
+# =========================
+# Git
+# =========================
+# Dossier interne de Git
+.git/
+.gitignore
