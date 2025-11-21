@@ -4,9 +4,10 @@ import java.time.LocalDate;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.medilabo.webapp.constraints.BirthDate;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -25,8 +26,14 @@ public class PatientRequestDTO {
     private String firstName;
     
     @NotNull(message = "Birth date is mandatory")
-    // pour valider qu’une date se situe dans le passé par rapport à la date actuelle.
-    @Past(message = "Birth date must be in the past")
+    /*
+    Validation métier personnalisée de la date de naissance.
+    Vérifie que la date est réaliste : 
+        - pas dans le futur,
+        - ne dépasse pas l’âge maximum autorisé (120 ans par défaut).
+    Evite par exemple d'utiliser @Past avec un contrôle dans le service.
+    */
+    @BirthDate(message = "Birthdate must correspond to an age between 0 and 120 years")
     // Nécessaire également lors d'une modification (si champs en erreur).
     // Utilisation de l’ISO, soit le format yyyy-MM-dd afin de garantir que Spring formatera correctement la valeur dans les formulaires <input type="date">
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
