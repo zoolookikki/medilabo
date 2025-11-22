@@ -77,10 +77,5 @@ public class PatientController {
             return ResponseEntity.notFound().build();
         }
     }
-
-    @GetMapping("/simulate500")
-    public String simulate500() {
-        throw new RuntimeException("Simulation d'erreur interne");
-    }
 }
 
