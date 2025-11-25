@@ -19,6 +19,19 @@ import com.medilabo.risk_service.model.RiskLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * Implementation of the {@link RiskService} interface responsible for computing the medical risk level of a patient and medical notes.
+ *
+ * <p>This service centralizes the complete risk-assessment workflow:</p>
+ * <ul>
+ *   <li>retrieves the patient information from the Patient microservice,</li>
+ *   <li>retrieves all medical notes for the patient from the Note microservice,</li>
+ *   <li>counts the distinct medical trigger terms found in the notes,</li>
+ *   <li>applies the risk-calculation rules defined in the specification,</li>
+ *   <li>returns a {@link RiskResponseDTO} describing the computed risk level.</li>
+ * </ul>
+ *
+ */
 @Service
 //Coupler @RequiredArgsConstructor avec des champs final pour rendre les dépendances immuables ==> mieux que @Autowired devenu obsolète.
 @RequiredArgsConstructor
@@ -28,12 +41,23 @@ public class RiskServiceImpl implements RiskService {
     private final PatientClient patientClient;
     private final NoteClient noteClient;
 
+    /**
+     * List of trigger terms used to evaluate diabetes risk.
+     */
     // Termes déclencheurs utilisés pour l’évaluation du risque.
     private static final List<String> TRIGGERS = List.of(
         "Hémoglobine A1C","Microalbumine","Taille","Poids","Fumeur","Fumeuse",
         "Anormal","Cholestérol","Vertige","Rechute","Réaction","Anticorps"
     );
 
+
+    /**
+     * Counts how many distinct trigger terms appear in the list of notes.
+     * <p>The matching is case-insensitive, and each trigger contributes only once even if found multiple times.</p>
+     *
+     * @param notes list of notes associated with a patient
+     * @return number of distinct matched trigger terms
+     */    
     // Un déclencheur n'est compté qu'une seule fois (set).
     // Insensible à la casse.
     private int countTriggers(List<NoteResponseDTO> notes) {
@@ -99,7 +123,15 @@ public class RiskServiceImpl implements RiskService {
         return riskLevel;
     }
 */
-    
+    /**
+     * Determines the risk level according to the specification.
+     *
+     * @param triggerCount number of trigger terms found in the notes
+     * @param age patient’s age
+     * @param gender patient’s gender (UNKNOWN is treated as MALE)
+     * @return the computed {@link RiskLevel}
+     * @throws IllegalArgumentException if parameters contain invalid values
+     */
     public RiskLevel determineRiskLevel(int triggerCount, int age, Gender gender) {
         if (triggerCount < 0) throw new IllegalArgumentException("triggerCount must be >= 0 : " + triggerCount);
         if (age < 0)          throw new IllegalArgumentException("age must be >= 0 : " + age);
@@ -130,6 +162,12 @@ public class RiskServiceImpl implements RiskService {
         return riskLevel;
     }
     
+    /**
+     * Computes the risk level for a patient.
+     *
+     * @param patientId the ID of the patient whose risk is to be evaluated
+     * @return a {@link RiskResponseDTO} containing the computed risk level
+     */
     @Override
     public RiskResponseDTO getRisk(Long patientId) {
         

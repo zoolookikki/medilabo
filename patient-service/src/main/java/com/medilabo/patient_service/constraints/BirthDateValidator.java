@@ -6,6 +6,13 @@ import java.time.Period;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.ConstraintValidator;
 
+/**
+ * Validator implementation for the {@link BirthDate} custom constraint.
+ *
+ * @see BirthDate
+ * @see ConstraintValidator
+ */
+
 // Voir chapitre 111.2.5 Le développement de contraintes personnalisées : https://www.jmdoudoux.fr/java/dej/chap-validation_donnees.htm
 
 // Implémente l’interface ConstraintValidator de Jakarta Validation.
@@ -14,11 +21,23 @@ public class BirthDateValidator implements ConstraintValidator<BirthDate, LocalD
 
     private int maxAge;
 
+    /**
+     * Initializes the validator by retrieving parameters from the annotation.
+     *
+     * @param constraintAnnotation the annotation instance containing configuration
+     */
     @Override
     public void initialize(BirthDate constraintAnnotation) {
         this.maxAge  = constraintAnnotation.maxAge();
     }
 
+    /**
+     * Performs the validation of the birth date.
+     *
+     * @param value   the date to validate
+     * @param context the validation context (unused here)
+     * @return {@code true} if the value is valid or {@code null}, otherwise {@code false}
+     */
     @Override
     public boolean isValid(LocalDate value, ConstraintValidatorContext context) {
         // On laisse @NotNull gérer le cas null

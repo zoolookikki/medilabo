@@ -22,20 +22,53 @@ public class SpringSecurityConfiguration {
     S’il en trouve un, il l’applique.
     S’il n’en trouve pas, il applique une configuration de sécurité par défaut (tout est protégé).
    */
+    /**
+     * Configures the main HTTP security filter chain.
+     *
+     * <p>
+     * Configuration details:
+     * <ul>
+     *   <li><b>CSRF disabled</b> otherwise, POST/PUT/PATCH/DELETE requests won't work (because Spring requires a CSRF token). This mechanism is unnecessary for REST APIs.</li>
+     *   <li><b>Authorization rules</b>:
+     *     <ul>
+     *       <li>requests to <b>/notes/**</b> require authentication,</li>
+     *       <li>all other routes are explicitly denied.</li>
+     *     </ul>
+     *   </li>
+     *   <li><b>HTTP Basic authentication enabled</b> with the default configuration.</li>
+     * </ul>
+     * </p>
+     *
+     * @param http the HttpSecurity object provided by Spring Security
+     * @return the configured security filter chain
+     * @throws Exception if the configuration fails
+     */    
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-            // Le mécanisme CSRF est désactivé sinon POST/PUT/PATCH/DELETE ne fonctionnent pas (car Spring exisge un jeton CSRF). Ce mécanisme est inutile pour les API REST.
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> {
               auth.requestMatchers("/notes/**").authenticated();
                 auth.anyRequest().denyAll();
             })
-            // active l’authentification HTTP Basic avec la config par défaut.
           .httpBasic(Customizer.withDefaults()) 
             .build();
     }   
     
+    /**
+     * Creates the in-memory user details service.
+     *
+     * <p>
+     * This configuration defines a single user stored in memory at startup.
+     * The password is hashed using BCrypt.  
+     * This approach is appropriate for simple microservices protected with HTTP Basic, where no dynamic user management is required.
+     * </p>
+     *
+     * @param encoder  the BCrypt encoder used to hash the password
+     * @param username the username loaded from application properties
+     * @param password the password loaded from application properties
+     * @return an {@link InMemoryUserDetailsManager} containing the configured user
+     */
     @Bean
     public UserDetailsService userDetailsService(
              PasswordEncoder encoder,

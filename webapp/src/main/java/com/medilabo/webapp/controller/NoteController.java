@@ -22,6 +22,28 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * MVC controller for displaying, creating, and managing notes associated with a specific patient.
+ *
+ * <p>
+ * This controller belongs to the Web application layer (WebApp) and communicates
+ * with two backend microservices:
+ * </p>
+ * <ul>
+ *     <li><strong>Patient microservice</strong> — used to retrieve patient details;</li>
+ *     <li><strong>Note microservice</strong> — used to retrieve and create medical notes.</li>
+ * </ul>
+ *
+ * <p>
+ * It exposes standard MVC endpoints that:
+ * </p>
+ * <ul>
+ *     <li>display a patient's notes,</li>
+ *     <li>show a form for creating a new note,</li>
+ *     <li>validate and submit note creation.</li>
+ * </ul>
+ *
+ */
 @Controller
 @RequestMapping("/notes")
 //Coupler @RequiredArgsConstructor avec des champs final pour rendre les dépendances immuables ==> mieux que @Autowired devenu obsolète.
@@ -31,6 +53,14 @@ public class NoteController {
     private final NoteClient noteClientApi;
     private final PatientClient patientClientApi;
 
+
+    /**
+     * Displays all notes associated with a specific patient.
+     *
+     * @param patientId the ID of the patient whose notes must be displayed
+     * @param model the MVC model used to populate the view
+     * @return the Thymeleaf template {@code note/list}
+     */
     @GetMapping("/patient/{patientId}")
     public String getNotesByPatient(@PathVariable Long patientId, Model model) {
         PatientResponseDTO patient = patientClientApi.findById(patientId);
@@ -40,6 +70,13 @@ public class NoteController {
         return "note/list";
     }
     
+    /**
+     * Displays the form used to create a new note for a given patient.
+     *
+     * @param patientId the ID of the patient for whom the note is created
+     * @param model the MVC model used to populate the form
+     * @return the Thymeleaf template {@code note/edit}
+     */    
     @GetMapping("/add/{patientId}")
     public String showCreateForm(@PathVariable Long patientId, Model model) {
         PatientResponseDTO patient = patientClientApi.findById(patientId);
@@ -50,6 +87,16 @@ public class NoteController {
         return "note/edit";
     }    
     
+    /**
+     * Handles the submission of the note creation form.
+     *
+     * @param noteRequestDTO the form data submitted by the user
+     * @param result contains validation errors, if any
+     * @param redirectAttributes used to store flash messages during redirect
+     * @param model re-used only when returning the form after validation errors
+     * @return a redirect to {@code /notes/patient/{patientId}} upon success,
+     *         or the Thymeleaf template {@code note/edit} in case of validation errors
+     */        
     @PostMapping
     public String submitCreateForm(@Valid @ModelAttribute("note") NoteRequestDTO noteRequestDTO,
             BindingResult result,

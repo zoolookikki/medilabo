@@ -20,6 +20,18 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * MVC controller for displaying, creating, and updating patient records.
+ *
+ * <p>
+ * This controller interacts with two backend microservices:
+ * </p>
+ * <ul>
+ *     <li><strong>Patient microservice</strong> — to retrieve, create and update patient data,</li>
+ *     <li><strong>Risk microservice</strong> — to compute the associated medical risk level.</li>
+ * </ul>
+ *
+ */
 @Controller
 @RequestMapping("/patients")
 //Coupler @RequiredArgsConstructor avec des champs final pour rendre les dépendances immuables ==> mieux que @Autowired devenu obsolète.
@@ -30,13 +42,24 @@ public class PatientController {
     private final PatientClient patientClientApi;
     private final RiskClient riskClientApi;
 
+    /**
+     * Displays the list of all patients.
+     *
+     * @param model the MVC model used to populate the view
+     * @return the Thymeleaf template {@code patient/list}
+     */
     @GetMapping
     public String list(Model model) {
         model.addAttribute("patients", patientClientApi.findAll());
         return "patient/list"; 
     }
 
-    // affiche le formulaire pour la création.
+    /**
+     * Displays an empty form for creating a new patient.
+     *
+     * @param model the MVC model used to populate the form
+     * @return the Thymeleaf template {@code patient/edit}
+     */
     @GetMapping("/add")
     public String showCreateForm(Model model) {
         model.addAttribute("patient", new PatientRequestDTO());
@@ -44,6 +67,14 @@ public class PatientController {
         return "patient/edit";
     }
 
+    /**
+     * Handles form submission when creating a new patient.
+     *
+     * @param patientRequestDTO the form data
+     * @param result contains validation errors if any
+     * @param redirectAttributes used to carry success messages after redirect
+     * @return a redirect to {@code /patients} or the {@code patient/edit} view on error
+     */    
     @PostMapping
     public String submitCreateForm(@Valid @ModelAttribute("patient") PatientRequestDTO patientRequestDTO,
             BindingResult result,
@@ -66,7 +97,13 @@ public class PatientController {
         return "redirect:/patients";
     }    
 
-    // afficher le formulaire pré-rempli.
+    /**
+     * Displays the update form pre-filled with an existing patient’s data.
+     *
+     * @param id the ID of the patient to update
+     * @param model the MVC model used to populate the view
+     * @return the Thymeleaf template {@code patient/edit}
+     */    
     @GetMapping("/{id}")
     public String showUpdateForm(@PathVariable Long id, Model model) {
         PatientResponseDTO patientResponseDTO = patientClientApi.findById(id);
@@ -79,7 +116,16 @@ public class PatientController {
         return "patient/edit";
     }    
 
-    // mettre à jour le patient.
+    /**
+     * Handles form submission when updating an existing patient.
+     *
+     * @param id the ID of the patient being updated
+     * @param patientRequestDTO the submitted form data
+     * @param result contains Bean Validation errors if any
+     * @param redirectAttributes used to store flash messages
+     * @param model used when redisplaying the form after errors
+     * @return a redirect to {@code /patients} or the {@code patient/edit} view on error
+     */    
     @PostMapping("/{id}/edit")
     public String submitUpdateForm(@PathVariable Long id,
             @Valid @ModelAttribute("patient") PatientRequestDTO patientRequestDTO,

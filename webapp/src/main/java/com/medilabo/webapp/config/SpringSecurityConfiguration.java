@@ -11,6 +11,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+/**
+ * Spring Security configuration.
+ *
+ */
 @Configuration
 public class SpringSecurityConfiguration {
     /*
@@ -20,6 +24,21 @@ public class SpringSecurityConfiguration {
     S’il en trouve un, il l’applique.
     S’il n’en trouve pas, il applique une configuration de sécurité par défaut (tout est protégé).
    */
+    /**
+     * Defines the application’s main security filter chain.
+     *
+     * <p>This configuration:</p>
+     * <ul>
+     *     <li>allows public access to the login page and static assets,</li>
+     *     <li>requires authentication for all other endpoints,</li>
+     *     <li>enables form-login with a custom redirection after success,</li>
+     *     <li>configures logout behavior (session invalidation + cookie removal).</li>
+     * </ul>
+     *
+     * @param http the shared {@link HttpSecurity} instance provided by Spring Security
+     * @return a fully configured {@code SecurityFilterChain}
+     * @throws Exception if an error occurs during configuration
+     */    
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -58,7 +77,15 @@ public class SpringSecurityConfiguration {
             .build();
     }   
     
-     @Bean
+    /**
+     * Provides the {@link UserDetailsService} used for authentication.
+     *
+     * @param encoder  the password encoder used to hash the password
+     * @param username the username loaded from application properties
+     * @param password the password loaded from application properties
+     * @return an initialized {@code UserDetailsService}
+     */
+    @Bean
     public UserDetailsService userDetailsService(
             PasswordEncoder encoder,
             @Value("${security.api.username}") String username, 

@@ -9,7 +9,31 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
-// Voir chapitre 111.2.5 Le développement de contraintes personnalisées : https://www.jmdoudoux.fr/java/dej/chap-validation_donnees.htm
+/**
+ * Custom Bean Validation annotation used to validate a birth date.
+ *
+ * <p>This constraint verifies that:</p>
+ * <ul>
+ *   <li>the date is not in the future,</li>
+ *   <li>the resulting age does not exceed a configurable maximum (120 years by default).</li>
+ * </ul>
+ *
+ * <p>Example usage:</p>
+ *
+ * <pre>{@code
+ * @BirthDate(maxAge = 120, message = "Birthdate must represent an age between 0 and 120 years")
+ * private LocalDate birthDate;
+ * }</pre>
+ *
+ * <p>
+ * As with all Bean Validation constraints, the {@code groups} and {@code payload} attributes are
+ * required by the specification, even if not used.
+ * </p>
+ *
+ * @see BirthDateValidator
+ */
+
+//Voir chapitre 111.2.5 Le développement de contraintes personnalisées : https://www.jmdoudoux.fr/java/dej/chap-validation_donnees.htm
 
 // Conseillé pour que cela apparaisse dans la documentation javadoc comme pour les autres annotations standards (@NotNull, @Email, @Past, etc...).
 @Documented

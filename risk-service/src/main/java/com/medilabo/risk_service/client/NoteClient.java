@@ -17,14 +17,34 @@ import com.medilabo.risk_service.exception.NoteServiceUnavailableException;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * HTTP client used by the WebApp to communicate with the Note microservice.
+ *
+ * <h2>Responsibilities</h2>
+ * <ul>
+ *   <li>Configure a {@code RestClient} instance with a base URL and HTTP Basic authentication headers.</li>
+ *   <li>Call the Note API to retrieve notes for a given patient.</li>
+ *   <li>Convert JSON responses into {@code NoteResponseDTO} objects.</li>
+ * </ul>
+ *
+ */
 @Component
 @Log4j2
 public class NoteClient {
-    // RestClient est synchrone : l’appel bloquera jusqu’à la réponse.
+    /**
+     * RestClient is synchronous: the call will block until a response is received.
+     */    
     private final RestClient rest;
-    
+
+    /**
+     * Constructs a {@code NoteClient} instance and configures the {@link RestClient} with a base URL and HTTP Basic authentication.
+     *
+     * @param builder   the RestClient builder provided by Spring
+     * @param baseUrl   the base URL of the Note microservice
+     * @param userName  Basic Auth username
+     * @param password  Basic Auth password
+     */    
     // ce constructeur est appelé gràce à l'annotation @Component : il est utilisé par Spring.
-    // le bean RestClient.Builder est fourni par Spring Boot.   
     public NoteClient(RestClient.Builder builder,
             @Value("${medilabo.note.url.api}") String baseUrl,
             @Value("${security.api.username}") String userName,
@@ -40,6 +60,20 @@ public class NoteClient {
                 .build();
     }
     
+
+    /**
+     * Retrieves the list of notes associated with a specific patient.
+     *
+     * <p>
+     * The call is synchronous and will block until the Note service responds.
+     * The response body is deserialized into a typed {@code List<NoteResponseDTO>}.
+     * In case the service returns {@code null}, an empty list is returned instead.
+     * </p>
+     *
+     * @param patientId the ID of the patient whose notes should be retrieved
+     * @return a list of {@code NoteResponseDTO}; never {@code null}
+     * @throws NoteServiceUnavailableException if the Note microservice is unavailable or unreachable
+     */    
     public List<NoteResponseDTO> findByPatientId(Long patientId) {
         try {
             log.debug("NoteClient.findByPatientId");

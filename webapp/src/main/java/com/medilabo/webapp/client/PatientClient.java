@@ -14,18 +14,40 @@ import com.medilabo.webapp.exception.PatientServiceUnavailableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * Client for communicating with the Patient microservice.
+ *
+ * <p>This component performs synchronous HTTP calls to retrieve, create or update patient information.</p>
+ *
+ * @see org.springframework.web.client.RestClient
+ * @see com.medilabo.webapp.dto.PatientResponseDTO
+ * @see com.medilabo.webapp.dto.PatientRequestDTO
+ */
 @Component
 //Coupler @RequiredArgsConstructor avec des champs final pour rendre les dépendances immuables ==> mieux que @Autowired devenu obsolète.
 @RequiredArgsConstructor
 @Log4j2
 public class PatientClient {
-    // voir remarque dans NoteClient.
+    /**
+     * RestClient is synchronous: the call will block until a response is received.
+     */
+    /*
+    Grâce au build, rest devient immutable donc ne peut plus être modifié.
+    Il faut donc supprimer l'alerte Spotbugs car il ne le voit pas.
+    */
     @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
             value = "EI_EXPOSE_REP2",
             justification = "Spring RestClient is immutable and thread-safe; no internal state exposure."
     )
     private final RestClient rest;
 
+    /**
+     * Retrieves all patients from the Patient microservice.
+     *
+     * @return a non-null list of {@link PatientResponseDTO}
+     * @throws com.medilabo.webapp.exception.PatientServiceUnavailableException
+     *         if the Patient microservice is unreachable or returns a 5xx error
+     */    
     public List<PatientResponseDTO> findAll() {
         try {
             log.debug("PatientClient.findAll");
@@ -51,6 +73,14 @@ public class PatientClient {
         }
     }
 
+    /**
+     * Retrieves a single patient by its unique identifier.
+     *
+     * @param id the identifier of the patient to retrieve
+     * @return the corresponding {@link PatientResponseDTO}.
+     * @throws com.medilabo.webapp.exception.PatientServiceUnavailableException
+     *         if the Patient microservice is unreachable or returns a 5xx error
+     */    
     public PatientResponseDTO findById(Long id) {
         try {
             log.debug("PatientClient.findById");
@@ -75,6 +105,14 @@ public class PatientClient {
         }
     }
     
+    /**
+     * Creates a new patient in the Patient microservice.
+     *
+     * @param patientRequestDTO the patient information
+     * @return the created {@link PatientResponseDTO}
+     * @throws com.medilabo.webapp.exception.PatientServiceUnavailableException
+     *         if the Patient microservice is unreachable or returns a 5xx error
+     */    
     public PatientResponseDTO create(PatientRequestDTO patientRequestDTO) {
         try {
             log.debug("PatientClient.create");
@@ -100,6 +138,15 @@ public class PatientClient {
         }
     }
     
+    /**
+     * Updates an existing patient in the Patient microservice.
+     *
+     * @param id the identifier of the patient to update
+     * @param patientRequestDTO the updated patient data
+     * @return the modified {@link PatientResponseDTO}
+     * @throws com.medilabo.webapp.exception.PatientServiceUnavailableException
+     *         if the Patient microservice is unreachable or returns a 5xx error
+     */    
     public PatientResponseDTO update(Long id, PatientRequestDTO patientRequestDTO) {
         try {
             log.debug("PatientClient.update");
