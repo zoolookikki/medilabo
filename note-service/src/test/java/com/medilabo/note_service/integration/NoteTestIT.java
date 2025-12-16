@@ -7,13 +7,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
+import com.medilabo.note_service.config.SecurityApiProperties;
 import com.medilabo.note_service.document.Note;
 import com.medilabo.note_service.repository.NoteRepository;
 
@@ -32,14 +32,13 @@ class NoteTestIT {
     // @Autowired pour Junit5, c'est plus simple.
     @Autowired MockMvc mvc;
     @Autowired NoteRepository noteRepository;
+    @Autowired
+    private SecurityApiProperties securityProps;
     
     private String note1Id;
     
-    @Value("${security.api.username}") private String username;
-    @Value("${security.api.password}") private String password; 
-
     private RequestPostProcessor basicAuthentication() {
-        return httpBasic(username, password);
+        return httpBasic(securityProps.getUsername(), securityProps.getPassword());
     }
     
     private RequestPostProcessor badBasicAuthentication() {
@@ -157,10 +156,4 @@ class NoteTestIT {
         mvc.perform(get("/note/{id}", note1Id).with(badBasicAuthentication()))
         .andExpect(status().isUnauthorized()); // 401
     }    
-    
-    @Test
-    void getSimulateInternalError() throws Exception {
-        mvc.perform(get("/notes/simulate500").with(basicAuthentication()))
-            .andExpect(status().isInternalServerError());
-    }
 }

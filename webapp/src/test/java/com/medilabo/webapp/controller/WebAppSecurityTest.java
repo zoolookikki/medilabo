@@ -2,11 +2,13 @@ package com.medilabo.webapp.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.medilabo.webapp.config.SecurityApiProperties;
 import com.medilabo.webapp.config.SpringSecurityConfiguration;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -17,6 +19,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @WebMvcTest(WebAppSecurityTest.class)
 //comme c'est un test unitaire, il faut importer explicitement la configuration de sécurité pour pouvoir la tester.
 @Import(SpringSecurityConfiguration.class)
+//pour que le fichier de configuration soit chargé.
+@EnableConfigurationProperties(SecurityApiProperties.class)
 public class WebAppSecurityTest {
 
     // @Autowired pour Junit5, c'est plus simple.

@@ -6,12 +6,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import com.medilabo.risk_service.config.MedilaboApiProperties;
+import com.medilabo.risk_service.config.SecurityApiProperties;
 import com.medilabo.risk_service.dto.NoteResponseDTO;
 import com.medilabo.risk_service.exception.NoteServiceUnavailableException;
 
@@ -46,16 +47,15 @@ public class NoteClient {
      */    
     // ce constructeur est appelé gràce à l'annotation @Component : il est utilisé par Spring.
     public NoteClient(RestClient.Builder builder,
-            @Value("${medilabo.note.url.api}") String baseUrl,
-            @Value("${security.api.username}") String userName,
-            @Value("${security.api.password}") String password) {
+            MedilaboApiProperties apiProps,
+            SecurityApiProperties securityProps) {
 
         // encodage pour mettre userName et password dans le header : HttpHeaders.AUTHORIZATION impose cela.
         String basic = Base64.getEncoder()
-                .encodeToString((userName + ":" + password).getBytes(StandardCharsets.UTF_8));
+                .encodeToString((securityProps.getUsername() + ":" + securityProps.getPassword()).getBytes(StandardCharsets.UTF_8));
 
         this.rest = builder
-                .baseUrl(baseUrl)
+                .baseUrl(apiProps.getNoteUrlApi())
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
                 .build();
     }

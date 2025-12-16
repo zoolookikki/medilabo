@@ -1,7 +1,5 @@
 package com.medilabo.patient_service.config;
 
-import org.springframework.beans.factory.annotation.Value;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -73,10 +71,9 @@ public class SpringSecurityConfiguration {
     @Bean
     public UserDetailsService userDetailsService(
             PasswordEncoder encoder,
-            @Value("${security.api.username}") String username, 
-            @Value("${security.api.password}") String password) {
-        var user = User.withUsername(username)
-                .password(encoder.encode(password))
+            SecurityApiProperties securityProps) {
+        var user = User.withUsername(securityProps.getUsername())
+                .password(encoder.encode(securityProps.getPassword()))
                 .build();
 
         // les comptes sont conservés dans une map en mémoire.

@@ -5,7 +5,7 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
@@ -13,6 +13,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
+import com.medilabo.risk_service.config.SecurityApiProperties;
 import com.medilabo.risk_service.config.SpringSecurityConfiguration;
 import com.medilabo.risk_service.dto.RiskResponseDTO;
 import com.medilabo.risk_service.exception.NoteServiceUnavailableException;
@@ -27,18 +28,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(RiskController.class)
 // comme c'est un test unitaire, il faut importer explicitement la configuration de sécurité pour pouvoir la tester.
 @Import(SpringSecurityConfiguration.class)
+// pour que le fichier de configuration soit chargé.
+@EnableConfigurationProperties(SecurityApiProperties.class)
 class RiskControllerTest {
 
     // @Autowired pour Junit5, c'est plus simple.
     @Autowired MockMvc mvc;
     @MockitoBean RiskService riskService;
-
-    @Value("${security.api.username}") private String username;
-    @Value("${security.api.password}") private String password; 
+    @Autowired
+    private SecurityApiProperties securityProps;
 
     private RequestPostProcessor basicAuthentication() {
-        return httpBasic(username, password);
-    } 
+        return httpBasic(securityProps.getUsername(), securityProps.getPassword());
+    }
     
     private RequestPostProcessor badBasicAuthentication() {
         return httpBasic("hs", "hs");

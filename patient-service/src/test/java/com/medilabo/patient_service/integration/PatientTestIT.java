@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +17,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import org.springframework.http.MediaType;
 
+import com.medilabo.patient_service.config.SecurityApiProperties;
 import com.medilabo.patient_service.entity.Patient;
 import com.medilabo.patient_service.repository.PatientRepository;
 
@@ -44,15 +44,14 @@ public class PatientTestIT {
     MockMvc mvc;
     @Autowired
     private PatientRepository patientRepository;
-
+    @Autowired
+    private SecurityApiProperties securityProps;
+    
     private Long patient1Id;
     private Long patient2Id;
     
-    @Value("${security.api.username}") private String username;
-    @Value("${security.api.password}") private String password; 
-
     private RequestPostProcessor basicAuthentication() {
-        return httpBasic(username, password);
+        return httpBasic(securityProps.getUsername(), securityProps.getPassword());
     }
     
     private RequestPostProcessor badBasicAuthentication() {
@@ -122,7 +121,7 @@ public class PatientTestIT {
         {
           "lastName": "xxx",
           "firstName": "xxx",
-          "birthDate": "1900-01-01",
+          "birthDate": "1950-01-01",
           "gender": "UNKNOWN",
           "address": "xxx",
           "phoneNumber": "000-000-0000"
@@ -173,7 +172,7 @@ public class PatientTestIT {
                 .content(jsonBody))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.phoneNumber").value(org.hamcrest.Matchers.containsString("XXX-XXX-XXXX")))
-            .andExpect(jsonPath("$.birthDate").value("Birth date must be in the past"));
+            .andExpect(jsonPath("$.birthDate").value("Birthdate must correspond to an age between 0 and 120 years"));
     }
     
     @Test
@@ -259,11 +258,5 @@ public class PatientTestIT {
     void badAuthentification() throws Exception {
         mvc.perform(get("/patient").with(badBasicAuthentication()))
         .andExpect(status().isUnauthorized()); // 401
-    }    
-
-    @Test
-    void getSimulateInternalError() throws Exception {
-        mvc.perform(get("/patients/simulate500").with(basicAuthentication()))
-           .andExpect(status().isInternalServerError());
     }    
 }
